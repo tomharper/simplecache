@@ -16,22 +16,34 @@ Building and Running
 
   - run the listener program as ./simplecache once you build it- it should then be listening on port 11211
 
-  - run the testclient program from a separate command line or run your other favorite memcached test to port 11211 -
+  - don't run the testclient program except to see what happens with bad input. 
+
+  - otherwise, from a separate command line or run your other favorite memcached test to port 11211 -
   this will fail every test other than get/set basic
 
-  - made a test script for bmemcached python
+Python Setup
+
+  - made a test script for bmemcached python, python crashes on the get ... didn't have time to debug this but it is expecting zlib compression support
+
+  - run setup_python.sh to setup virtualenv 
+
+  - source memc/bin/activate
+
+  - python testscript.py
 
 Notes on Implementation
 
-1. this cache is uber simple: it would be fun to add:
+  This cache is uber simple: it would be fun to add:
 
-  - better locking for reader/writers- this would take a little more time and understanding usage patterns
+  - better locking for reader/writers- this would take a little more time and understanding usage patterns- right now this is the minimum safe implementation.  Ideally we could isolate locking to subareas of memory or even get to key level locks
 
-  - better cache- std::map is not the fastest or most efficient way to store lots of data- boost::unordered_map is faster for example- but that would just be the start
+  - better cache- std::map is not the fastest or most efficient way to store lots of data- boost::unordered_map is faster for example- but that would just be the start- use slabs, etc
 
-  - write a distributed one, add slabs, proper low level locking as opposed to global, and run the cache itself possibly in another thread context with better isolation
+  - write a distributed cache
+
+  - run the cache itself possibly in another thread context with better isolation
 
   - still need to do some basic stuff like deletes, expiration, auth, multi-read, multi-write
 
-  - write a more efficient protocol
+  - write a more efficient protocol- the current one is a little awkward but good enough
 

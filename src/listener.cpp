@@ -116,6 +116,7 @@ unsigned char* parse_and_process(unsigned char* buf, int* len_out)
 
     if (!value.length()) {
       printf("key not found %s\n",key);
+      delete key;
       return pErr;
     } else {
 
@@ -138,6 +139,7 @@ unsigned char* parse_and_process(unsigned char* buf, int* len_out)
       pErr[26] = 0xbe;
       pErr[27] = 0xef;
       memcpy(pErr+28, value.c_str(), value.length());
+      delete key;
       return pErr;
     }
   }
@@ -172,7 +174,8 @@ unsigned char* parse_and_process(unsigned char* buf, int* len_out)
     pErr[0] = 0x81;
     pErr[1] = 0x02;
     pErr[23] = 0x01;
-   return pErr;
+    delete key;
+    return pErr;
   }
 
   return pErr;
