@@ -129,15 +129,14 @@ unsigned char* parse_and_process(unsigned char* buf, int* len_out)
       memset(pErr, 0, len);
       pErr[0] = 0x81;
       pErr[4] = 0x04;
-      pErr[7] = 0x01;
       pErr[11] = value.length() + 4; // this will break for anything larger than 8 bits
 
       //boilerplate
       pErr[23] = 0x01;
-      pErr[24] = 0xDE;
-      pErr[25] = 0xAD;
-      pErr[26] = 0xBE;
-      pErr[27] = 0xEF;
+      pErr[24] = 0xde;
+      pErr[25] = 0xad;
+      pErr[26] = 0xbe;
+      pErr[27] = 0xef;
       memcpy(pErr+28, value.c_str(), value.length());
       return pErr;
     }
