@@ -1,0 +1,2 @@
+Twisted==14.0.2
+python-binary-memcached==0.24.3
