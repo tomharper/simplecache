@@ -104,25 +104,24 @@ unsigned char* parse_and_process(unsigned char* buf, int* len_out)
   // get
   if (buf[1] == 0x00) {
 
-    // todo: get key - check offset for get
-    std::string key;
-    key.assign(buf[24], keylen);
+    // get key
+    char* key = new char[keylen+1];
+    key[keylen] = '\0';
+    memcpy(key, &buf[24], keylen);
 
     //0x0001  Key not found
     //0x0002  Key exists  - we don't care- same as no error
-    printf("key %s %d\n",key.c_str(), keylen);
-
     std::string value;
     SimpleCache::getCreateInstance()->get(key, value);
 
     if (!value.length()) {
-      printf("key not found %s\n",key.c_str());
+      printf("key not found %s\n",key);
       return pErr;
     } else {
 
-      printf("got key %s len %d value %s len %d \n",key.c_str(), (int)key.length(), value.c_str(), (int)value.length());
+      printf("key:%s value:%s len:%d \n",key, value.c_str(), (int)value.length());
 
-      int len = 32 + value.length();
+      int len = 28 + value.length();
 
       delete pErr;
       pErr = new unsigned char[len];
@@ -131,7 +130,7 @@ unsigned char* parse_and_process(unsigned char* buf, int* len_out)
       pErr[0] = 0x81;
       pErr[4] = 0x04;
       pErr[7] = 0x01;
-      pErr[11] = value.length() + 4; // this will break
+      pErr[11] = value.length() + 4; // this will break for anything larger than 8 bits
 
       //boilerplate
       pErr[23] = 0x01;
@@ -152,18 +151,20 @@ unsigned char* parse_and_process(unsigned char* buf, int* len_out)
     // ignore expiry - 28-31
 
     // get key
-    std::string key;
-    key.assign(buf[31], keylen);
+    char* key = new char[keylen+1];
+    key[keylen] = '\0';
+    memcpy(key, &buf[32], keylen);
 
     // there is always flags and expiry
     int valuelen = totlen - keylen - 8;
 
-    std::string value;
-    value.assign(buf[31+keylen], valuelen);
+    char* value = new char[valuelen+1];
+    value[valuelen] = '\0';
+    memcpy(value, &buf[32+keylen], valuelen);
 
-    printf("storing key %s len %d value %s len %d\n",key.c_str(), keylen, value.c_str(), valuelen);
+    printf("storing key %s len %d value %s len %d\n",key, keylen, value, valuelen);
 
-    SimpleCache::getCreateInstance()->put(key.c_str(), value.c_str());
+    SimpleCache::getCreateInstance()->put(key, value);
    
     delete pErr;
     pErr = new unsigned char[24];
@@ -201,8 +202,9 @@ void thread_function(int new_fd)
       if (send(new_fd, bufOut, bytesToRead, 0) == -1) {
         perror("send");
       } else {
-        printf("sent response %s\n",&buffer[24]);
+        printf("sent response %s\n",bufOut+24);
       }
+      delete bufOut;
     } 
     else 
     {

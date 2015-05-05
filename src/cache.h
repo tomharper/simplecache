@@ -26,9 +26,8 @@ public:
         return instance.get();
     }
 
-    void get(const std::string& key, std::string& value) {
+    void get(const char* key, std::string& value) {
 /*
-        printf("*********** getting %s %s\n", key.c_str(), value.c_str());
         std::map<std::string,std::string>::iterator it = m_cache.begin();
         std::cout << "m_cache contains:\n";
         for (it=m_cache.begin(); it!=m_cache.end(); ++it)
@@ -45,14 +44,11 @@ public:
             readers--;
             return;
         }
-//        printf(" --- %s %lu", std::get<1>(*i).c_str(), std::get<1>(*i).length());
+        //printf(" --- %s %lu", std::get<1>(*i).c_str(), std::get<1>(*i).length());
         value = std::get<1>(*i);
         readers--;
     }
-
-    void put(const std::string& key, const std::string& value) {
-
-//        printf("*********** putting %s %s\n", key.c_str(), value.c_str());
+    void put(const char* key, const char* value) {
 
         // writer blocks out other writers and new readers
         m_write.lock();
