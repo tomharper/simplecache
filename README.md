@@ -10,18 +10,20 @@ General
 
 Building and Running
 
-I only built/tested this on OSX, so it probably won't work on linux or windows or anywhere else
+  - I only built/tested this on OSX, so it probably won't work on linux or windows or anywhere else
 
-there is no make file but a ./make.sh script in src will create the listener program
+  - there is no make file but a ./make.sh script in src will create the listener program
 
-run the listener program as ./simplecach once you build it- it should then be listening on port 11211
+  - run the listener program as ./simplecache once you build it- it should then be listening on port 11211
 
-run the testclient program from a separate command line or run your other favorite memcached test to port 11211 -
+  - run the testclient program from a separate command line or run your other favorite memcached test to port 11211 -
   this will fail every test other than get/set basic
+
+  - made a test script for bmemcached python
 
 Notes on Implementation
 
-1. this cache is uber simple: it would be fun to:
+1. this cache is uber simple: it would be fun to add:
 
   - better locking for reader/writers- this would take a little more time and understanding usage patterns
 

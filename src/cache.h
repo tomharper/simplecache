@@ -3,6 +3,7 @@
 #include <memory>
 #include <mutex>
 #include <unistd.h>
+#include <iostream>
 
 
 class SimpleCache {
@@ -25,8 +26,14 @@ public:
         return instance.get();
     }
 
-    std::string get(const std::string& key) {
-
+    void get(const std::string& key, std::string& value) {
+/*
+        printf("*********** getting %s %s\n", key.c_str(), value.c_str());
+        std::map<std::string,std::string>::iterator it = m_cache.begin();
+        std::cout << "m_cache contains:\n";
+        for (it=m_cache.begin(); it!=m_cache.end(); ++it)
+          std::cout << it->first.c_str() << " => " << it->second.c_str() << '\n';
+*/
         // readers will wait here while writer writes
         // and other readers drain out
         m_write.lock();
@@ -36,22 +43,25 @@ public:
         auto i = m_cache.find(key);
         if (i == m_cache.end()) {
             readers--;
-            return nullptr;
+            return;
         }
-        auto& outpair = *i;
+//        printf(" --- %s %lu", std::get<1>(*i).c_str(), std::get<1>(*i).length());
+        value = std::get<1>(*i);
         readers--;
-        return std::get<1>(outpair);
     }
 
-    void put(const std::string& key, std::string& value) {
+    void put(const std::string& key, const std::string& value) {
+
+//        printf("*********** putting %s %s\n", key.c_str(), value.c_str());
+
         // writer blocks out other writers and new readers
         m_write.lock();
 
         // writer waits for readers to drain out
         while(readers > 0) { sleep(0); }
 
-        auto insert_result = m_cache.insert(std::pair<std::string,std::string>(key,value));
-
+        m_cache.insert(std::make_pair(key,value));
+        
         m_write.unlock();
 
         // todo laters:

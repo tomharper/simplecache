@@ -65,7 +65,7 @@ unsigned char* parse_and_process(unsigned char* buf, int* len_out)
   // ignore byte 5- data type
   // ignore status/reserved byte 6,7-
 
-  unsigned int totlen = (buf[11] << 24) | (buf[10] << 16) | (buf[9] << 8) | buf[8];
+  int totlen = (buf[8] << 24) | (buf[9] << 16) | (buf[10] << 8) | buf[11];
   if (totlen == 0) {
     printf("keylen invalid\n");
     valid = false;
@@ -106,19 +106,21 @@ unsigned char* parse_and_process(unsigned char* buf, int* len_out)
 
     // todo: get key - check offset for get
     std::string key;
-    key.assign(buf[31], keylen);
+    key.assign(buf[24], keylen);
 
     //0x0001  Key not found
     //0x0002  Key exists  - we don't care- same as no error
+    printf("key %s %d\n",key.c_str(), keylen);
 
-    std::string value = SimpleCache::getCreateInstance()->get(key);
+    std::string value;
+    SimpleCache::getCreateInstance()->get(key, value);
 
     if (!value.length()) {
       printf("key not found %s\n",key.c_str());
       return pErr;
     } else {
 
-      printf("got key %s len %d value %s len %d\n",key.c_str(), key.length(), value.c_str(), value.length());
+      printf("got key %s len %d value %s len %d \n",key.c_str(), (int)key.length(), value.c_str(), (int)value.length());
 
       int len = 32 + value.length();
 
@@ -154,15 +156,23 @@ unsigned char* parse_and_process(unsigned char* buf, int* len_out)
     key.assign(buf[31], keylen);
 
     // there is always flags and expiry
-    unsigned int valuelen = totlen - keylen - 8;
+    int valuelen = totlen - keylen - 8;
 
     std::string value;
     value.assign(buf[31+keylen], valuelen);
 
     printf("storing key %s len %d value %s len %d\n",key.c_str(), keylen, value.c_str(), valuelen);
 
-    SimpleCache::getCreateInstance()->put(key, value);
-
+    SimpleCache::getCreateInstance()->put(key.c_str(), value.c_str());
+   
+    delete pErr;
+    pErr = new unsigned char[24];
+    *len_out = 24;
+    memset(pErr, 0, 24);
+    pErr[0] = 0x81;
+    pErr[1] = 0x02;
+    pErr[23] = 0x01;
+   return pErr;
   }
 
   return pErr;
